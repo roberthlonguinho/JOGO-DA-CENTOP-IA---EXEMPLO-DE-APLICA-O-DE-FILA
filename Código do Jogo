@@ -1,0 +1,158 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+
+typedef struct NODE * NODEPTR;
+
+struct Corpo {
+	int x, y;
+};
+
+struct NODE {
+	Corpo elem;
+	NODEPTR next;
+};
+
+// Representação da tela
+char tela[25][80];
+
+// Desenhar - Insere um caractere na tela
+void Desenhar(int x, int y, char c){
+	tela[y][x] = c;
+}
+
+// Fila
+NODEPTR p = NULL, u = NULL;
+
+// Atualizar tela
+void AtualizarTela() {
+	system("cls");
+	int x, y;
+	for (y = 0; y < 25; y++) { // Percorrendo as linhas da tela
+		for (x = 0; x < 80; x++) { // Percorrendo as colunas da tela
+			if (tela[y][x] != '\0') {
+				printf("%c", tela[y][x]);
+			} else {
+				printf(" ");
+			}
+		}
+		printf("\n");
+	}
+}
+
+void enquee(NODEPTR *p, NODEPTR *u, Corpo elem) {
+	NODEPTR n;
+	n = (NODEPTR) malloc(sizeof(struct NODE));
+	n->elem = elem;
+	if (*p == NULL) { // Não era null e sim NULL
+		*p = n;
+	} else { // Tive que inserir isso porque se a fila estiver vazia não vai existir nenhum elemento anterior para apontar para o novo nó
+		(*u)->next = n;
+	}
+	*u = n;
+}
+
+Corpo dequee(NODEPTR *p, NODEPTR *u) {
+	NODEPTR aux = *p;
+	Corpo elem = aux->elem;
+	*p = aux->next;
+	if (*p == NULL) {
+		*u = NULL;
+	}
+	free(aux);
+	return elem;
+}
+
+void CriarCentopeia() {
+	int y = 12, x;
+	for (x = 15; x <= 65; x++) {
+		Corpo c;
+		c.x = x;
+		c.y = y;
+		enquee(&p, &u, c);
+		Desenhar(x, y, '#');
+	}
+}
+
+void movimentaCima() {
+	Corpo c;
+	c.x = u->elem.x;
+	c.y = u->elem.y - 1;
+	if (tela[c.y][c.x] == '#') {
+		printf("GAME OVER!!!!!!!!!!!!!!");
+		exit(1);
+	}
+	enquee(&p, &u, c);
+	Desenhar(c.x, c.y, '#');
+	Desenhar(p->elem.x, p->elem.y, ' ');
+	dequee(&p, &u);
+	AtualizarTela();
+}
+
+void movimentaBaixo() {
+	Corpo c;
+	c.x = u->elem.x;
+	c.y = u->elem.y + 1;
+	if (tela[c.y][c.x] == '#') {
+		printf("GAME OVER!!!!!!!!!!!!!!");
+		exit(1);
+	}
+	enquee(&p, &u, c);
+	Desenhar(c.x, c.y, '#');
+	Desenhar(p->elem.x, p->elem.y, ' ');
+	dequee(&p, &u);
+	AtualizarTela();
+}
+
+void movimentaDir() {
+	Corpo c;
+	c.x = u->elem.x + 1;
+	c.y = u->elem.y;
+	if (tela[c.y][c.x] == '#') {
+		printf("GAME OVER!!!!!!!!!!!!!!");
+		exit(1);
+	}
+	enquee(&p, &u, c);
+	Desenhar(c.x, c.y, '#');
+	Desenhar(p->elem.x, p->elem.y, ' ');
+	dequee(&p, &u);
+	AtualizarTela();
+}
+
+void movimentaEsq() {
+	Corpo c;
+	c.x = u->elem.x - 1;
+	c.y = u->elem.y;
+	if (tela[c.y][c.x] == '#') {
+		printf("GAME OVER!!!!!!!!!!!!!!");
+		exit(1);
+	}
+	enquee(&p, &u, c);
+	Desenhar(c.x, c.y, '#');
+	Desenhar(p->elem.x, p->elem.y, ' ');
+	dequee(&p, &u);
+	AtualizarTela();
+}
+
+int main() {
+	CriarCentopeia();
+	AtualizarTela();
+	char c;
+	do {
+		if (kbhit()) { // Alguma tecla foi pressionada?
+			c = getch(); // Essa tecla vai ser armazenada na variável c	
+		}
+		if (c == 'w' || c == 'W') {
+			movimentaCima();
+		} else if (c == 's' || c == 'S') {
+			movimentaBaixo(); 
+		} else if (c == 'a' || c == 'A') {
+			movimentaEsq();
+		} else if (c == 'd' || c == 'D') {
+			movimentaDir();
+		}
+		
+	} while (c != 27); // Tecla ESC
+	
+	return 1;
+}
